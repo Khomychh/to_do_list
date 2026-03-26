@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
 class TaskCreate(BaseModel):
-    title: str
+    title: str = Field(min_length=1)
     description: Optional[str] = None
     due_date: Optional[datetime] = None
 
@@ -20,7 +20,7 @@ class TaskRead(BaseModel):
 
 
 class TaskUpdate(BaseModel):
-    title: Optional[str] = None
+    title: Optional[str] = Field(default=None, min_length=1)
     description: Optional[str] = None
     is_completed: Optional[bool] = None
     due_date: Optional[datetime] = None
