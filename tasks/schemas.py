@@ -4,6 +4,19 @@ from typing import Optional
 
 from tasks.models import TaskPriority
 
+class TagBase(BaseModel):
+    name: str = Field(min_length=1)
+
+
+class TagCreate(TagBase):
+    pass
+
+
+class TagRead(TagBase):
+    id: int
+
+    model_config = {"from_attributes": True}
+
 
 class TaskCreate(BaseModel):
     title: str = Field(min_length=1)
@@ -11,6 +24,7 @@ class TaskCreate(BaseModel):
     due_date: Optional[datetime] = None
     email: Optional[EmailStr] = None
     priority: TaskPriority = TaskPriority.medium
+    tag_ids: list[int] = Field(default_factory=list)
 
 
 class TaskRead(BaseModel):
@@ -22,6 +36,7 @@ class TaskRead(BaseModel):
     email: Optional[EmailStr] = None
     created_at: datetime
     priority: TaskPriority
+    tags: list[TagRead] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 
@@ -33,3 +48,4 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
     email: Optional[EmailStr] = None
     priority: Optional[TaskPriority] = None
+    tag_ids: Optional[list[int]] = None

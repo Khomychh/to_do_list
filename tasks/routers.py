@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import get_db, Pagination, pagination_params
 from tasks import crud
-from tasks.schemas import TaskRead, TaskCreate, TaskUpdate
+from tasks.schemas import TaskRead, TaskCreate, TaskUpdate, TagRead, TagCreate
 from tasks.celery_tasks import send_task_completed_email
 
 router = APIRouter()
@@ -77,3 +77,32 @@ async def delete_task(
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
     return None
+
+
+@router.get("/tags", response_model=list[TagRead], status_code=200)
+async def list_tags(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    pagination: Annotated[Pagination, Depends(pagination_params)],
+) -> list[TagRead]:
+    tags = await crud.get_all_tags(db, pagination.skip, pagination.limit)
+    return tags
+
+
+@router.post("/tags", response_model=TagRead, status_code=201)
+async def create_tag(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    tag_in: TagCreate,
+) -> TagRead:
+    tag = await crud.create_tag(db, tag_in)
+    return tag
+
+
+@router.delete("/tags/{tag_id}", status_code=204)
+async def delete_tag(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    tag_id: int,
+) -> None:
+    success = await crud.delete_tag(db, tag_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return
