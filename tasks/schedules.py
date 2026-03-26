@@ -19,7 +19,7 @@ def delete_expired_tasks():
         for task in expired:
             if task.email:
                 send_deadline_missed_email.delay(
-                    task.email, task.title, task.deadline
+                    task.email, task.title, task.due_date
                 )
             db.delete(task)
 
