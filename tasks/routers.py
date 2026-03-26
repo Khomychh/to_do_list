@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import Enum
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import get_db, Pagination, pagination_params
@@ -10,12 +11,19 @@ from tasks.schemas import TaskRead, TaskCreate, TaskUpdate
 router = APIRouter()
 
 
+class TaskStatus(str, Enum):
+    all = "all"
+    completed = "completed"
+    uncompleted = "uncompleted"
+
+
 @router.get("/tasks", response_model=list[TaskRead], status_code=200)
 async def list_tasks(
     db: Annotated[AsyncSession, Depends(get_db)],
     pagination: Annotated[Pagination, Depends(pagination_params)],
+    status: TaskStatus | None = Query(TaskStatus.all, description="Filter by status"),
 ):
-    return await crud.get_all_tasks(db, pagination.skip, pagination.limit)
+    return await crud.get_all_tasks(db, pagination.skip, pagination.limit, status=status)
 
 @router.get("/tasks/{task_id}", response_model=TaskRead, status_code=200)
 async def read_task(db: Annotated[AsyncSession, Depends(get_db)], task_id: int):
