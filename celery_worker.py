@@ -4,7 +4,8 @@ from celery.schedules import crontab
 celery_app = Celery(
     "worker",
     broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/0"
+    backend="redis://localhost:6379/0",
+    include=["tasks.celery_tasks"]
 )
 
 celery_app.conf.update(
@@ -18,7 +19,7 @@ celery_app.conf.update(
 
 celery_app.conf.beat_schedule = {
     "delete-expired-tasks-every-hour": {
-        "task": "tasks.celery_tasks.delete_expired_tasks",
+        "task": "tasks.schedules.delete_expired_tasks",
         "schedule": crontab(minute=0, hour="*"),  # щогодини
     },
 }

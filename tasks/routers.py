@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import get_db, Pagination, pagination_params
 from tasks import crud
 from tasks.schemas import TaskRead, TaskCreate, TaskUpdate
+from tasks.celery_tasks import send_task_completed_email
 
 router = APIRouter()
 
@@ -52,14 +53,10 @@ async def complete_task(task_id: int, db: AsyncSession = Depends(get_db)):
     task = await crud.complete_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    return task
 
+    if task.email:
+        send_task_completed_email.delay(task.email, task.title)
 
-@router.patch("/tasks/{task_id}/uncomplete", response_model=TaskRead)
-async def uncomplete_task(task_id: int, db: AsyncSession = Depends(get_db)):
-    task = await crud.uncomplete_task(db, task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
 

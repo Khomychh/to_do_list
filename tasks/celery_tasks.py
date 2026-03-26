@@ -1,23 +1,33 @@
-from sqlalchemy import select
+import asyncio
+from datetime import datetime
+
+from fastapi_mail import FastMail, MessageSchema, MessageType
 
 from celery_worker import celery_app
-from database import SessionLocal
-from tasks.models import Task
-from datetime import datetime, timezone
+from config import mail_config
 
 
 @celery_app.task
-def delete_expired_tasks():
-    db = SessionLocal()
-    try:
-        now = datetime.now(timezone.utc)
-        stmt = select(Task).where(Task.due_date < now, Task.is_completed == False)
-        expired = db.execute(stmt).scalars().all()
+def send_task_completed_email(email: str, task_title: str):
+    message = MessageSchema(
+        subject="Завдання виконано",
+        recipients=[email],
+        body=f"Завдання «{task_title}» було позначено як виконане.",
+        subtype=MessageType.plain,
+    )
+    fm = FastMail(mail_config)
 
-        for task in expired:
-            db.delete(task)
+    asyncio.run(fm.send_message(message))
 
-        db.commit()
-        return f"Deleted {len(expired)} expired tasks"
-    finally:
-        db.close()
+
+@celery_app.task
+def send_deadline_missed_email(email: str, task_title: str, deadline: datetime):
+    message = MessageSchema(
+        subject="Дедлайн пропущено",
+        recipients=[email],
+        body=f"Дедлайн для завдання «{task_title}» ({deadline.strftime('%d.%m.%Y %H:%M')}) вже минув!",
+        subtype=MessageType.plain,
+    )
+    fm = FastMail(mail_config)
+
+    asyncio.run(fm.send_message(message))
