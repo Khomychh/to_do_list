@@ -47,6 +47,8 @@ class TaskRead(BaseModel):
     repeat_every_days: Optional[int] = None
     next_run_at: Optional[datetime] = None
 
+    deadline_reminder_sent_at: Optional[datetime] = None
+
     model_config = {"from_attributes": True}
 
 

@@ -5,7 +5,7 @@ celery_app = Celery(
     "worker",
     broker="redis://localhost:6379/0",
     backend="redis://localhost:6379/0",
-    include=["tasks.celery_tasks"]
+    include=["tasks.celery_tasks", "tasks.schedules"]
 )
 
 celery_app.conf.update(
@@ -25,5 +25,9 @@ celery_app.conf.beat_schedule = {
     "process-recurring-tasks-every-minute": {
         "task": "tasks.schedules.process_recurring_tasks",
         "schedule": crontab(minute="*"),
-    }
+    },
+    "send-deadline-reminders-every-minute": {
+        "task": "tasks.schedules.send_deadline_reminders",
+        "schedule": crontab(minute="*"),
+    },
 }

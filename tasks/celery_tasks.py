@@ -31,3 +31,19 @@ def send_deadline_missed_email(email: str, task_title: str, deadline: datetime):
     fm = FastMail(mail_config)
 
     asyncio.run(fm.send_message(message))
+
+
+@celery_app.task
+def send_deadline_reminder_email(email: str, task_title: str, deadline: datetime):
+    message = MessageSchema(
+        subject="Нагадування про дедлайн",
+        recipients=[email],
+        body=(
+            f"Нагадуємо: завдання «{task_title}» має дедлайн "
+            f"{deadline.strftime('%d.%m.%Y %H:%M')}.\n"
+        ),
+        subtype=MessageType.plain,
+    )
+    fm = FastMail(mail_config)
+
+    asyncio.run(fm.send_message(message))
