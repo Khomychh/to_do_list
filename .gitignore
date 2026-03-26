@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg-info/
+dist/
+build/
+*.egg
 
 # Virtual Environment
 .venv/
@@ -13,8 +17,39 @@ env/
 
 # IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # FastAPI
 .pytest_cache/
 *.db
 *.sqlite3
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+
+# Alembic
+alembic/versions/__pycache__/
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
