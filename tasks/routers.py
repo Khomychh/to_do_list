@@ -16,7 +16,10 @@ async def list_tasks(
     pagination: Annotated[Pagination, Depends(pagination_params)],
     status: str | None = Query(None, description="Filter by status"),
 ):
-    return await crud.get_all_tasks(db, pagination.skip, pagination.limit, status=status)
+    return await crud.get_all_tasks(
+        db, pagination.skip, pagination.limit, status=status
+    )
+
 
 @router.get("/tasks/{task_id}", response_model=TaskRead, status_code=200)
 async def read_task(db: Annotated[AsyncSession, Depends(get_db)], task_id: int):
@@ -33,8 +36,11 @@ async def create_task(
 ):
     return await crud.create_task(db, task)
 
+
 @router.patch("/tasks/{task_id}", response_model=TaskRead)
-async def update_task(task_id: int, task: TaskUpdate, db: AsyncSession = Depends(get_db)):
+async def update_task(
+    task_id: int, task: TaskUpdate, db: AsyncSession = Depends(get_db)
+):
     task = await crud.update_task(db, task_id, task)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
