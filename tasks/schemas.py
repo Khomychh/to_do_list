@@ -4,6 +4,7 @@ from typing import Optional
 
 from tasks.models import TaskPriority
 
+
 class TagBase(BaseModel):
     name: str = Field(min_length=1)
 
@@ -26,6 +27,10 @@ class TaskCreate(BaseModel):
     priority: TaskPriority = TaskPriority.medium
     tag_ids: list[int] = Field(default_factory=list)
 
+    is_recurring: bool = False
+    repeat_every_days: Optional[int] = None
+    next_run_at: Optional[datetime] = None
+
 
 class TaskRead(BaseModel):
     id: int
@@ -38,6 +43,10 @@ class TaskRead(BaseModel):
     priority: TaskPriority
     tags: list[TagRead] = Field(default_factory=list)
 
+    is_recurring: bool
+    repeat_every_days: Optional[int] = None
+    next_run_at: Optional[datetime] = None
+
     model_config = {"from_attributes": True}
 
 
@@ -49,3 +58,7 @@ class TaskUpdate(BaseModel):
     email: Optional[EmailStr] = None
     priority: Optional[TaskPriority] = None
     tag_ids: Optional[list[int]] = None
+
+    is_recurring: Optional[bool] = None
+    repeat_every_days: Optional[int] = None
+    next_run_at: Optional[datetime] = None

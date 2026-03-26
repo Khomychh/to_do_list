@@ -22,4 +22,8 @@ celery_app.conf.beat_schedule = {
         "task": "tasks.schedules.delete_expired_tasks",
         "schedule": crontab(minute=0, hour="*"),  # щогодини
     },
+    "process-recurring-tasks-every-minute": {
+        "task": "tasks.schedules.process_recurring_tasks",
+        "schedule": crontab(minute="*"),
+    }
 }

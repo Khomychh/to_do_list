@@ -1,8 +1,10 @@
+from datetime import timedelta
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tasks.models import Task, Tag
-from tasks.schemas import TaskCreate, TaskUpdate, TaskRead, TagCreate
+from tasks.schemas import TaskCreate, TaskUpdate, TagCreate
 
 
 async def _get_tags_by_ids(db: AsyncSession, tag_ids: list[int]) -> list[Tag]:
@@ -45,6 +47,9 @@ async def get_task(db: AsyncSession, task_id: int):
 async def create_task(db: AsyncSession, task_in: TaskCreate):
     task_data = task_in.model_dump(exclude={"tag_ids"})
     db_task = Task(**task_data)
+
+    if db_task.is_recurring and db_task.repeat_every_days is not None and db_task.next_run_at is None:
+        db_task.next_run_at = db_task.created_at + timedelta(days=db_task.repeat_every_days)
 
     db_task.tags = await _get_tags_by_ids(db, task_in.tag_ids)
 

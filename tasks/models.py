@@ -1,7 +1,17 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Integer, String, Boolean, DateTime, func, Enum as SAEnum, Table, Column, ForeignKey
+from sqlalchemy import (
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    func,
+    Enum as SAEnum,
+    Table,
+    Column,
+    ForeignKey,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -53,6 +63,11 @@ class Task(Base):
         default=TaskPriority.medium,
         server_default=TaskPriority.medium.value,
     )
+
+    is_recurring: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    repeat_every_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    next_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=func.now(),
