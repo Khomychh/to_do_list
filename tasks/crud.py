@@ -2,23 +2,19 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tasks.models import Task
-from tasks.routers import TaskStatus
 from tasks.schemas import TaskCreate, TaskUpdate, TaskRead
 
 
 async def get_all_tasks(
     db: AsyncSession,
-    status: TaskStatus,
     skip: int = 0,
     limit: int = 100,
+    status: str | None = None,
 ):
     stmt = select(Task).offset(skip).limit(limit)
 
-    if status == TaskStatus.completed:
+    if status == "completed":
         stmt = stmt.where(Task.is_completed == True)
-    elif status == TaskStatus.uncompleted:
-        stmt = stmt.where(Task.is_completed == False)
-
 
     result = await db.execute(stmt)
     return result.scalars().all()

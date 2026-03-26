@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import Enum
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import get_db, Pagination, pagination_params
@@ -11,17 +10,11 @@ from tasks.schemas import TaskRead, TaskCreate, TaskUpdate
 router = APIRouter()
 
 
-class TaskStatus(str, Enum):
-    all = "all"
-    completed = "completed"
-    uncompleted = "uncompleted"
-
-
 @router.get("/tasks", response_model=list[TaskRead], status_code=200)
 async def list_tasks(
     db: Annotated[AsyncSession, Depends(get_db)],
     pagination: Annotated[Pagination, Depends(pagination_params)],
-    status: TaskStatus | None = Query(TaskStatus.all, description="Filter by status"),
+    status: str | None = Query(None, description="Filter by status"),
 ):
     return await crud.get_all_tasks(db, pagination.skip, pagination.limit, status=status)
 
@@ -56,9 +49,9 @@ async def complete_task(task_id: int, db: AsyncSession = Depends(get_db)):
     return task
 
 
-@router.patch("/tasks/{task_id}/complete", response_model=TaskRead)
-async def complete_task(task_id: int, db: AsyncSession = Depends(get_db)):
-    task = await crud.complete_task(db, task_id)
+@router.patch("/tasks/{task_id}/uncomplete", response_model=TaskRead)
+async def uncomplete_task(task_id: int, db: AsyncSession = Depends(get_db)):
+    task = await crud.uncomplete_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task
